@@ -46,7 +46,7 @@ def test_4():
         t_clusters, t_labels = utils.make_clusters(scale=10) 
         kmeans.fit(t_clusters)
         klabels = kmeans.labels
-        utils.plot_clusters(t_clusters, klabels, "test3.png")
+        utils.plot_clusters(t_clusters, klabels, "test_3.png")
     except:
         print("k input is invalid")
     pass
@@ -57,7 +57,7 @@ def test_5():
         t_clusters, t_labels = utils.make_clusters(scale=10) 
         kmeans.fit(t_clusters)
         klabels = kmeans.labels
-        utils.plot_clusters(t_clusters, klabels, "test3.png")
+        utils.plot_clusters(t_clusters, klabels, "3_test.png")
     except:
         print("k input is invalid")
     pass
