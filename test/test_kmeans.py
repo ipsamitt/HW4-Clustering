@@ -13,6 +13,7 @@ def test_kmeans():
     predicted = kmeans.predict(t_clusters)
     scores =  s.score(t_clusters, t_labels)
     utils.plot_multipanel(t_clusters, klabels, predicted, scores)
+    pass
 
 
 def test_2():
@@ -25,6 +26,7 @@ def test_2():
     predicted = kmeans.predict(t_clusters)
     scores =  s.score(t_clusters, t_labels)
     utils.plot_multipanel(t_clusters, klabels, predicted, scores)
+    pass
 
 def test_3():
     s = Silhouette() 
@@ -36,6 +38,7 @@ def test_3():
     predicted = kmeans.predict(t_clusters)
     scores =  s.score(t_clusters, t_labels)
     utils.plot_multipanel(t_clusters, klabels, predicted, scores)
+    pass
 
 def test_4():
     try:
@@ -46,6 +49,7 @@ def test_4():
         utils.plot_clusters(t_clusters, klabels, "test3.png")
     except:
         print("k input is invalid")
+    pass
 
 def test_5():
     try:
@@ -56,10 +60,12 @@ def test_5():
         utils.plot_clusters(t_clusters, klabels, "test3.png")
     except:
         print("k input is invalid")
+    pass
 
-
+"""
 test_kmeans()
 test_2()
 test_3()
 test_4()
 test_5()
+"""
