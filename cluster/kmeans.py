@@ -4,71 +4,89 @@ from scipy.spatial.distance import cdist
 
 class KMeans:
     def __init__(self, k: int, tol: float = 1e-6, max_iter: int = 100):
-        """
-        In this method you should initialize whatever attributes will be required for the class.
 
-        You can also do some basic error handling.
+        self.k = k
+        self.tol = tol
+        self.max_iter = max_iter
+        self.centroids = np.empty([k,1])
+        self.labels = []
+        self.inputted_mat = np.zeros(shape=(3, 2))
 
-        What should happen if the user provides the wrong input or wrong type of input for the
-        argument k?
+        if type(k) != int:
+              raise Exception("k must be an integer")
 
-        inputs:
-            k: int
-                the number of centroids to use in cluster fitting
-            tol: float
-                the minimum error tolerance from previous error during optimization to quit the model fit
-            max_iter: int
-                the maximum number of iterations before quitting model fit
-        """
 
+        if k < 0:
+              raise Exception("k has to be a positive integer")
+
+    
     def fit(self, mat: np.ndarray):
-        """
-        Fits the kmeans algorithm onto a provided 2D matrix.
-        As a bit of background, this method should not return anything.
-        The intent here is to have this method find the k cluster centers from the data
-        with the tolerance, then you will use .predict() to identify the
-        clusters that best match some data that is provided.
 
-        In sklearn there is also a fit_predict() method that combines these
-        functions, but for now we will have you implement them both separately.
-
-        inputs:
-            mat: np.ndarray
-                A 2D matrix where the rows are observations and columns are features
+        """Given k and epsilon, then:
+        1. Initialize m to k random values.
+        2. For each data point x, find the closest m_i.
+        3. Compute new m_i’s to be the centroid (average) of the closest points
+        found in (2).
+        4. Compute max change in an m_i from the previous m_i.
+        5. Repeat (2) through (4) until the change in centroid is less than some
+        epsilon.
         """
+
+        self.inputted_mat = mat
+        #find num of observations
+        obs_count, feature_count = mat.shape
+
+        #assign random centroids
+        curr_centroids = mat[np.random.choice(obs_count, self.k, replace=False)]
+        self.centroids = curr_centroids
+
+        for i in range(self.max_iter):
+            labels = self.assign_clusters(mat)
+            new_centroids = self.find_centroids(mat)
+            #find difference in new and old centroids
+            centroid_change = np.linalg.norm(new_centroids - curr_centroids)
+            #if tolerance level reached, break loop
+            if centroid_change < self.tol:
+                break
+            curr_centroids = new_centroids
+        
+        self.centroids = curr_centroids
+        self.labels = labels
+
 
     def predict(self, mat: np.ndarray) -> np.ndarray:
-        """
-        Predicts the cluster labels for a provided matrix of data points--
-            question: what sorts of data inputs here would prevent the code from running?
-            How would you catch these sorts of end-user related errors?
-            What if, for example, the matrix is of a different number of features than
-            the data that the clusters were fit on?
-
-        inputs:
-            mat: np.ndarray
-                A 2D matrix where the rows are observations and columns are features
-
-        outputs:
-            np.ndarray
-                a 1D array with the cluster label for each of the observations in `mat`
-        """
-
+        predicted_clusters =  self.assign_clusters(mat)
+        return predicted_clusters
+    
     def get_error(self) -> float:
-        """
-        Returns the final squared-mean error of the fit model. You can either do this by storing the
-        original dataset or recording it following the end of model fitting.
 
-        outputs:
-            float
-                the squared-mean error of the fit model
-        """
+        squared_errors = 0
+        for i in range(self.k):
+            # get the points in cluster i
+            mask = self.labels == i
+            cluster_points = self.inputted_mat[mask]
+            centroid = self.centroids[i]
+            # calculate the squared distance between point and centroid
+            squared_distances = np.sum((cluster_points - centroid) ** 2, axis=1)
+            squared_errors += np.sum(squared_distances)
 
+
+        return squared_errors
+    
     def get_centroids(self) -> np.ndarray:
-        """
-        Returns the centroid locations of the fit model.
+        return self.centroids
 
-        outputs:
-            np.ndarray
-                a `k x m` 2D matrix representing the cluster centroids of the fit model
-        """
+    def assign_clusters(self, mat: np.ndarray):
+        #find distance between centroids and points
+        distances = np.linalg.norm(mat[:, np.newaxis] - self.centroids, axis = 2)
+        #return lowest distance clusters
+        return np.argmin(distances, axis = 1)
+    
+    def find_centroids(self, mat: np.ndarray):
+        new_centroids = np.zeros((self.k, mat.shape[1]))
+        #for each cluster
+        for i in range(self.k):
+            clustered_points = mat[self.labels == i]
+            #find new centroid that matches label
+            new_centroids[i] = clustered_points.mean(axis=0) if clustered_points.size else self.centroids[i]
+        return new_centroids

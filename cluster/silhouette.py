@@ -8,19 +8,55 @@ class Silhouette:
         inputs:
             none
         """
+        pass
 
     def score(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
-        """
-        calculates the silhouette score for each of the observations
 
-        inputs:
-            X: np.ndarray
-                A 2D matrix where the rows are observations and columns are features.
+        n = X.shape[0]
+        scores = np.zeros(n)
 
-            y: np.ndarray
-                a 1D array representing the cluster labels for each of the observations in `X`
+        dist_mat = self.pairwise_dist(X)
 
-        outputs:
-            np.ndarray
-                a 1D array with the silhouette scores for each of the observations in `X`
-        """
+        for i in range(n):
+            curr_cluster = y[i]
+            cluster_distances = dist_mat[i][y == curr_cluster]
+            a_i = np.mean(cluster_distances[cluster_distances != 0])
+            
+            different_cluster_distances = []
+            for label in np.unique(y):
+                if label != curr_cluster:
+                     # compute distance to points in the other cluster
+                    other_cluster_points = dist_mat[i][y == label]
+                    different_cluster_distances.append(np.mean(other_cluster_points))
+
+            b_i = min(different_cluster_distances)  # nearest cluster's average distance
+           
+            # calculate silhouette score for point i
+            if a_i < b_i:
+                s_i = (b_i - a_i) / b_i
+            elif a_i == b_i:
+                s_i = 0
+            else:
+                s_i = (b_i - a_i) / a_i
+
+            scores[i] = s_i
+        
+        return scores
+   
+    #compute distance matrix of pairwise distances of X
+    def pairwise_dist(self, X: np.ndarray) -> np.ndarray:
+
+        n_samples = X.shape[0]        
+        distance_matrix = np.zeros((n_samples, n_samples))
+        
+        # compute the pairwise distances
+        for i in range(n_samples):
+            for j in range(i + 1, n_samples):  
+                # compute euclidean distance between  i and j
+                dist = np.linalg.norm(X[i] - X[j])
+                distance_matrix[i, j] = dist
+                distance_matrix[j, i] = dist  
+
+        return distance_matrix
+
+
